@@ -229,20 +229,18 @@ function executeCommand() {
         }
 
         terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Запрос прав суперпользователя (sudo)...</div>`;
-        terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Инициализация распаковки пакета "${escapeHtml(inputName)}"...</div>`;
+        terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Поиск пакета "${escapeHtml(inputName)}" в системе...</div>`;
 
         setTimeout(() => {
-            // Определяем финальное имя файла: если расширение уже есть, оставляем его, иначе пробуем .zip, затем .rar
+            // Если введено имя без точки (без расширения), автоматически добавляем .zip
             let fileName = inputName;
             if (!inputName.includes('.')) {
-                // По умолчанию, если расширения нет, берем .zip (можно изменить на .rar если ваш архив в .rar)
-                // Но лучше сразу подставить приоритетное расширение, например .zip
-                fileName = inputName + '.zip'; 
+                fileName = inputName + '.zip';
             }
 
             const fileUrl = `downloads/${fileName}`;
 
-            // Запускаем скачивание напрямую через создание ссылки
+            // Создаем ссылку для скачивания
             const link = document.createElement('a');
             link.href = fileUrl;
             link.download = fileName;
@@ -250,7 +248,7 @@ function executeCommand() {
             link.click();
             document.body.removeChild(link);
 
-            terminalLog.innerHTML += `<div class="text-cyber-neon">[✓] Запрос отправлен! Если файл "${escapeHtml(fileName)}" существует в папке downloads/, загрузка началась.</div>`;
+            terminalLog.innerHTML += `<div class="text-cyber-neon">[✓] Успешно: файл "${escapeHtml(fileName)}" передан на скачивание!</div>`;
             terminalLog.scrollTop = terminalLog.scrollHeight;
         }, 500);
 
