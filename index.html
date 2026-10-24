@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>b0o0q // Cyber Profile & Terminal Core</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            bg: '#05070a',
+                            panel: 'rgba(13, 17, 23, 0.75)',
+                            border: '#1f293d',
+                            neon: '#ffe600', /* Изменено на желтый */
+                            neonGlow: 'rgba(255, 230, 0, 0.25)',
+                            cyan: '#00f0ff',
+                            purple: '#bd00ff',
+                            pink: '#ff007f',
+                            yellow: '#ffe600',
+                            text: '#e6edf3',
+                            muted: '#8b949e'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'Fira Code', 'SFMono-Regular', 'Consolas', 'monospace'],
+                        sans: ['Inter', '-apple-system', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Подключение CSS файла -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-cyber-neon selection:text-black">
+
+    <!-- CRT Visual Overlay Filter -->
+    <div class="scanlines"></div>
+
+    <!-- Dynamic Interactive Background Canvas -->
+    <canvas id="bgCanvas" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+    <!-- Top Navigation HUD Header -->
+    <header class="sticky top-0 z-50 bg-cyber-bg/90 backdrop-blur-md border-b border-cyber-border/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <a href="#" class="flex items-center gap-2 group">
+                    <div class="w-9 h-9 rounded bg-cyber-panel border border-cyber-border flex items-center justify-center text-cyber-neon font-mono font-bold group-hover:border-cyber-neon group-hover:shadow-[0_0_10px_var(--neon-color)] transition-all">
+                        &gt;_
+                    </div>
+                    <div>
+                        <span class="font-mono font-extrabold text-lg tracking-wider text-white group-hover:text-cyber-neon transition-colors">b0o0q</span>
+                        <span class="text-[10px] block font-mono text-cyber-muted -mt-1 font-semibold">SYS.VER//2026.4</span>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="hidden md:flex items-center space-x-6 text-xs font-mono">
+                <button onclick="switchView('profile')" id="nav-profile" class="nav-link text-cyber-neon flex items-center gap-1.5 hover:text-cyber-neon transition-colors">
+                    <i class="fa-solid fa-user-ninja"></i> [ПРОФИЛЬ]
+                </button>
+                <button onclick="switchView('projects')" id="nav-projects" class="nav-link text-cyber-muted flex items-center gap-1.5 hover:text-cyber-neon transition-colors">
+                    <i class="fa-solid fa-cubes"></i> [ПРОЕКТЫ]
+                </button>
+                <button onclick="switchView('terminal')" id="nav-terminal" class="nav-link text-cyber-muted flex items-center gap-1.5 hover:text-cyber-neon transition-colors">
+                    <i class="fa-solid fa-terminal"></i> [CLI ТЕРМИНАЛ]
+                </button>
+            </nav>
+
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleAudio()" id="audioBtn" title="Включить/Выключить звуковые эффекты" 
+                        class="p-2 w-9 h-9 flex items-center justify-center rounded bg-cyber-panel border border-cyber-border text-cyber-muted hover:text-cyber-neon hover:border-cyber-neon transition-all">
+                    <i id="audioIcon" class="fa-solid fa-volume-xmark text-xs"></i>
+                </button>
+
+                <div class="relative group">
+                    <button class="p-2 w-9 h-9 flex items-center justify-center rounded bg-cyber-panel border border-cyber-border text-cyber-muted hover:text-cyber-neon hover:border-cyber-neon transition-all">
+                        <i class="fa-solid fa-palette text-xs"></i>
+                    </button>
+                    <div class="absolute right-0 mt-2 w-40 py-2 bg-cyber-panel border border-cyber-border rounded shadow-xl hidden group-hover:block z-50 text-xs font-mono">
+                        <button onclick="setTheme('neon')" class="w-full text-left px-3 py-1.5 hover:bg-cyber-border text-yellow-400 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span> Cyber Yellow
+                        </button>
+                        <button onclick="setTheme('synthwave')" class="w-full text-left px-3 py-1.5 hover:bg-cyber-border text-pink-500 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-pink-500"></span> Synthwave
+                        </button>
+                        <button onclick="setTheme('space')" class="w-full text-left px-3 py-1.5 hover:bg-cyber-border text-cyan-400 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span> Deep Space
+                        </button>
+                    </div>
+                </div>
+
+                <a href="https://github.com/b0o0q" target="_blank" class="px-3 py-1.5 rounded bg-cyber-panel border border-cyber-border hover:border-cyber-neon text-white text-xs font-mono flex items-center gap-2 transition-all hover:shadow-[0_0_10px_rgba(255,230,0,0.2)]">
+                    <i class="fa-brands fa-github text-sm"></i>
+                    <span class="hidden sm:inline">GitHub</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container Layout -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full z-10 relative">
+        <div class="mb-8 p-3 rounded-md bg-cyber-panel border border-cyber-border flex flex-col sm:flex-row items-center justify-between text-xs font-mono gap-2 shadow-lg">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-cyber-neon animate-ping"></span>
+                <span class="text-cyber-muted">СТАТУС СИСТЕМЫ:</span>
+                <span class="text-white font-bold">ОНЛАЙН</span>
+            </div>
+            <div class="flex items-center gap-4 text-cyber-muted">
+                <span><i class="fa-solid fa-code-branch text-cyber-neon"></i> main*</span>
+                <span><i class="fa-solid fa-location-crosshairs text-cyber-cyan"></i> Покайся</span>
+                <span id="liveClock" class="text-cyber-neon font-bold">00:00:00 UTC</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- LEFT SIDEBAR -->
+            <aside class="lg:col-span-1 space-y-6">
+                <div class="cyber-card rounded-xl p-6 text-center lg:text-left relative">
+                    <div class="relative w-40 h-40 mx-auto lg:mx-0 mb-5 group">
+                        <div class="absolute -inset-1 rounded-full bg-gradient-to-r from-cyber-neon via-cyber-cyan to-cyber-purple opacity-75 blur group-hover:opacity-100 transition duration-500 animate-pulse"></div>
+                        <img src="img/holy.jpg" 
+                             alt="b0o0q Cyber Avatar" 
+                             class="relative w-40 h-40 rounded-full object-cover border-2 border-cyber-neon shadow-2xl">
+                        <div class="absolute bottom-1 right-1 bg-cyber-bg border border-cyber-neon text-cyber-neon text-[10px] font-mono px-2 py-0.5 rounded-full">
+                            DEV_OPS
+                        </div>
+                    </div>
+
+                    <h1 class="text-2xl font-extrabold font-mono text-white tracking-wide flex items-center justify-center lg:justify-start gap-2">
+                        QwQ <i class="fa-solid fa-circle-check text-cyber-neon text-sm" title="Verified Architect"></i>
+                    </h1>
+                    <p class="text-xs font-mono text-cyber-neon mb-3">@b0o0q // Cute 'eblan' </p>
+
+                    <p class="text-xs text-cyber-muted leading-relaxed font-sans mb-4">
+                        Начинающий в данной дисциплине.
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                        <button onclick="triggerHologramMessage()" class="py-2 px-3 bg-cyber-neon/10 border border-cyber-neon text-cyber-neon hover:bg-cyber-neon hover:text-black font-bold rounded transition-all">
+                            <i class="fa-solid fa-bolt"></i> СВЯЗАТЬСЯ
+                        </button>
+                        <button onclick="playCyberSound('click'); switchView('terminal'); focusTerminal();" class="py-2 px-3 bg-cyber-panel border border-cyber-border hover:border-cyber-cyan text-white rounded transition-all">
+                            <i class="fa-solid fa-terminal"></i> CLI
+                        </button>
+                    </div>
+                </div>
+
+                <div class="cyber-card rounded-xl p-5 space-y-4">
+                    <h3 class="text-xs font-mono font-bold text-cyber-neon uppercase tracking-wider flex items-center justify-between">
+                        <span><i class="fa-solid fa-chart-simple"></i> МЕТРИКИ СИСТЕМЫ</span>
+                        <span class="animate-ping w-2 h-2 rounded-full bg-cyber-neon"></span>
+                    </h3>
+                    <div class="space-y-3 text-xs font-mono">
+                        <div>
+                            <div class="flex justify-between text-cyber-muted mb-1">
+                                <span>ЗАГРУЗКА ЦП</span>
+                                <span id="cpuUsage" class="text-cyber-neon">12%</span>
+                            </div>
+                            <div class="w-full bg-cyber-bg h-1.5 rounded overflow-hidden border border-cyber-border">
+                                <div id="cpuBar" class="bg-cyber-neon h-full w-[12%] transition-all duration-500"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- RIGHT MAIN CONTENT -->
+            <section class="lg:col-span-3 space-y-8">
+                <!-- VIEW 1: PROFILE -->
+                <div id="view-profile" class="space-y-8 view-panel">
+                    <div class="cyber-card rounded-xl p-6 relative overflow-hidden">
+                        <div class="relative z-10 space-y-4">
+                            <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-mono">
+                                Начало своего пути в данной сфере<br>
+                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyber-neon via-cyber-cyan to-cyber-purple">
+                                    и пиздец с шизой
+                                </span>
+                            </h2>
+                            <p class="text-sm text-cyber-muted max-w-2xl leading-relaxed">
+                                Привет! Я <strong>b0o0q</strong>. Начинаю свой путь в IT.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="cyber-card rounded-xl p-6">
+                        <h3 class="text-sm font-mono font-bold text-white mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-days text-cyber-neon"></i> ГРАФИК АКТИВНОСТИ КОММИТОВ (2026)
+                        </h3>
+                        <div class="w-full overflow-hidden" id="heatmapWrapper">
+                            <div id="heatmapGrid" class="w-full"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-mono font-bold text-white mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-thumbtack text-cyber-neon"></i> ИЗБРАННЫЕ РЕПОЗИТОРИИ
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="pinnedProjectsContainer"></div>
+                    </div>
+                </div>
+
+                <!-- VIEW 2: PROJECTS -->
+                <div id="view-projects" class="space-y-6 view-panel hidden">
+                    <div class="cyber-card rounded-xl p-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                        <input type="text" id="projectSearchInput" onkeyup="filterProjects()" placeholder="Поиск репозиториев..." 
+                               class="w-full sm:w-80 bg-cyber-bg border border-cyber-border rounded px-4 py-2 text-xs font-mono text-white focus:outline-none focus:border-cyber-neon">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="allProjectsContainer"></div>
+                </div>
+
+                <!-- VIEW 3: TERMINAL -->
+                <div id="view-terminal" class="space-y-4 view-panel hidden">
+                    <div class="cyber-card rounded-xl overflow-hidden border border-cyber-neon/50 shadow-2xl">
+                        <div class="bg-cyber-bg px-4 py-2.5 border-b border-cyber-border flex items-center justify-between font-mono text-xs">
+                            <span class="text-cyber-muted">b0o0q@cyber-core:~</span>
+                        </div>
+                        <div id="terminalLog" class="p-4 h-96 overflow-y-auto font-mono text-xs space-y-2 bg-black/90 terminal-scroll">
+                            <div class="text-cyber-neon">ДОБРО ПОЖАЛОВАТЬ В CLI b0o0q. Введите 'help'.</div>
+                        </div>
+                        <div class="bg-cyber-bg/90 p-3 border-t border-cyber-border flex items-center gap-2 font-mono text-xs">
+                            <span class="text-cyber-neon font-bold">b0o0q@core:~$</span>
+                            <input type="text" id="cliInput" autocomplete="off" placeholder="Введите команду..." 
+                                   class="w-full bg-transparent border-none text-white focus:outline-none font-mono">
+                            <button onclick="executeCommand()" class="px-3 py-1 bg-cyber-neon text-black font-bold rounded">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Подключение JS файла -->
+    <script src="script.js"></script>
+</body>
+</html>
