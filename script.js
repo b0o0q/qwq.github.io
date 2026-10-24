@@ -244,6 +244,7 @@ async function executeCommand() {
     terminalLog.innerHTML += `<div>b0o0q@core:~$ ${escapeHtml(fullCmd)}</div>`;
     cliInput.value = '';
 
+    // Четкая обработка команд
     if (cmdLower === 'help') {
         terminalLog.innerHTML += `<div class="text-cyber-neon">Доступно: projects, matrix, sudo install &lt;пакет&gt;, clear</div>`;
     } 
@@ -312,6 +313,7 @@ async function executeCommand() {
     else {
         terminalLog.innerHTML += `<div class="text-yellow-400">Команда не найдена. Введите 'help' для справки.</div>`;
     }
+    
     terminalLog.scrollTop = terminalLog.scrollHeight;
 }
 
