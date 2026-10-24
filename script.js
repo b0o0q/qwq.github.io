@@ -206,7 +206,34 @@ function focusTerminal() {
     if (cliInput) setTimeout(() => cliInput.focus(), 100);
 }
 
-function executeCommand() {
+// Вспомогательная функция для автоматического сканирования папки downloads через сервер
+async function getDownloadsFiles() {
+    try {
+        const response = await fetch('downloads/');
+        if (!response.ok) throw new Error('Не удалось прочитать папку downloads');
+        const html = await response.text();
+        
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const links = doc.querySelectorAll('a');
+        
+        let files = [];
+        links.forEach(link => {
+            let href = link.getAttribute('href');
+            if (href && href !== '../' && href !== './' && !href.endsWith('/')) {
+                try { href = decodeURIComponent(href); } catch(e) {}
+                let fileName = href.split('/').pop();
+                if (fileName) files.push(fileName);
+            }
+        });
+        return files;
+    } catch (e) {
+        console.error(e);
+        return [];
+    }
+}
+
+async function executeCommand() {
     const fullCmd = cliInput.value.trim();
     const cmdLower = fullCmd.toLowerCase();
     if (!fullCmd) return;
@@ -217,6 +244,21 @@ function executeCommand() {
 
     if (cmdLower === 'help') {
         terminalLog.innerHTML += `<div class="text-cyber-neon">Доступно: projects, matrix, sudo install &lt;пакет&gt;, clear</div>`;
+    } else if (cmdLower === 'projects') {
+        terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Сканирование директории /downloads...</div>`;
+        terminalLog.scrollTop = terminalLog.scrollHeight;
+
+        const files = await getDownloadsFiles();
+        
+        if (files.length === 0) {
+            terminalLog.innerHTML += `<div class="text-cyber-muted">Папка downloads пуста или сервер не разрешает просмотр директории.</div>`;
+        } else {
+            terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Доступные пакеты:</div>`;
+            files.forEach(file => {
+                const nameWithoutExt = file.replace(/\.[^/.]+$/, "");
+                terminalLog.innerHTML += `<div class="text-cyber-neon pl-4">- ${escapeHtml(nameWithoutExt)}</div>`;
+            });
+        }
     } else if (cmdLower === 'matrix') {
         isMatrixMode = !isMatrixMode;
         terminalLog.innerHTML += `<div class="text-cyber-neon">Matrix Mode: ${isMatrixMode}</div>`;
@@ -229,26 +271,31 @@ function executeCommand() {
         }
 
         terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Запрос прав суперпользователя (sudo)...</div>`;
-        terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Поиск пакета "${escapeHtml(inputName)}" в системе...</div>`;
+        terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Поиск пакета "${escapeHtml(inputName)}" в директории...</div>`;
+        terminalLog.scrollTop = terminalLog.scrollHeight;
+
+        const files = await getDownloadsFiles();
 
         setTimeout(() => {
-            // Если введено имя без точки (без расширения), автоматически добавляем .zip
-            let fileName = inputName;
-            if (!inputName.includes('.')) {
-                fileName = inputName + '.zip';
+            let matchedFile = files.find(f => {
+                let nameOnly = f.replace(/\.[^/.]+$/, "").toLowerCase();
+                return nameOnly === inputName.toLowerCase();
+            });
+
+            if (!matchedFile) {
+                matchedFile = inputName.includes('.') ? inputName : inputName + '.zip';
             }
 
-            const fileUrl = `downloads/${fileName}`;
+            const fileUrl = `downloads/${matchedFile}`;
 
-            // Создаем ссылку для скачивания
             const link = document.createElement('a');
             link.href = fileUrl;
-            link.download = fileName;
+            link.download = matchedFile;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
 
-            terminalLog.innerHTML += `<div class="text-cyber-neon">[✓] Успешно: файл "${escapeHtml(fileName)}" передан на скачивание!</div>`;
+            terminalLog.innerHTML += `<div class="text-cyber-neon">[✓] Успешно: файл "${escapeHtml(matchedFile)}" передан на скачивание!</div>`;
             terminalLog.scrollTop = terminalLog.scrollHeight;
         }, 500);
 
