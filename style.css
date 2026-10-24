@@ -109,3 +109,7 @@ body {
     height: auto;
     object-fit: contain;
 }
+
+.cyber-card a {
+    transition: all 0.3s ease;
+}
