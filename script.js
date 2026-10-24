@@ -1,31 +1,10 @@
-// Автоматическое сканирование папки downloads через сервер
-async function getDownloadsFiles() {
-    try {
-        const response = await fetch('downloads/');
-        if (!response.ok) throw new Error('Не удалось прочитать папку downloads');
-        const html = await response.text();
-        
-        // Парсим HTML-ответ сервера
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const links = doc.querySelectorAll('a');
-        
-        let files = [];
-        links.forEach(link => {
-            let href = link.getAttribute('href');
-            // Пропускаем системные ссылки и папки
-            if (href && href !== '../' && href !== './' && !href.endsWith('/')) {
-                try { href = decodeURIComponent(href); } catch(e) {}
-                let fileName = href.split('/').pop();
-                if (fileName) files.push(fileName);
-            }
-        });
-        return files;
-    } catch (e) {
-        console.error(e);
-        return [];
-    }
-}
+// Список файлов в локальной папке downloads (добавляйте сюда файлы по мере необходимости)
+const downloadableFiles = [
+    'project-one.zip',
+    'cyber-dashboard.rar',
+    'ai-helper.tar.gz',
+    'portfolio-v1.zip'
+];
 
 // Массив репозиториев (подгружается динамически с GitHub)
 let projectsData = [];
@@ -235,31 +214,27 @@ function focusTerminal() {
     if (cliInput) setTimeout(() => cliInput.focus(), 100);
 }
 
-async function executeCommand() {
-    const fullCmd = cliInput.value.trim();
+function executeCommand() {
+    const fullCmd = cliInput.value ? cliInput.value.trim() : '';
     const cmdLower = fullCmd.toLowerCase();
+    
     if (!fullCmd) return;
     
     playCyberSound('click');
     terminalLog.innerHTML += `<div>b0o0q@core:~$ ${escapeHtml(fullCmd)}</div>`;
     cliInput.value = '';
 
-    // Четкая обработка команд
     if (cmdLower === 'help') {
         terminalLog.innerHTML += `<div class="text-cyber-neon">Доступно: projects, matrix, sudo install &lt;пакет&gt;, clear</div>`;
     } 
     else if (cmdLower === 'projects') {
-        terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Сканирование директории /downloads...</div>`;
-        terminalLog.scrollTop = terminalLog.scrollHeight;
-
-        const files = await getDownloadsFiles();
+        terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Доступные проекты в локальной библиотеке (/downloads):</div>`;
         
-        if (files.length === 0) {
-            terminalLog.innerHTML += `<div class="text-cyber-muted">Папка downloads пуста или сервер не разрешает просмотр директории.</div>`;
+        if (downloadableFiles.length === 0) {
+            terminalLog.innerHTML += `<div class="text-cyber-muted">Папка пуста.</div>`;
         } else {
-            terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Доступные пакеты:</div>`;
-            files.forEach(file => {
-                // Выводим имя файла без расширения
+            downloadableFiles.forEach(file => {
+                // Убираем расширение (всё, начиная с точки) для вывода в терминал
                 const nameWithoutExt = file.replace(/\.[^/.]+$/, "");
                 terminalLog.innerHTML += `<div class="text-cyber-neon pl-4">- ${escapeHtml(nameWithoutExt)}</div>`;
             });
@@ -272,24 +247,24 @@ async function executeCommand() {
     else if (cmdLower.startsWith('sudo install')) {
         let inputName = fullCmd.replace(/^sudo\s+install\s*/i, '').trim();
         if (!inputName) {
-            terminalLog.innerHTML += `<div class="text-yellow-400">Ошибка: не указано имя пакета. Пример: sudo install test</div>`;
+            terminalLog.innerHTML += `<div class="text-yellow-400">Ошибка: не указано имя пакета. Пример: sudo install project-one</div>`;
             terminalLog.scrollTop = terminalLog.scrollHeight;
             return;
         }
 
         terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Запрос прав суперпользователя (sudo)...</div>`;
-        terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Поиск пакета "${escapeHtml(inputName)}" в директории...</div>`;
+        terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Поиск проекта "${escapeHtml(inputName)}" в библиотеке...</div>`;
         terminalLog.scrollTop = terminalLog.scrollHeight;
 
-        const files = await getDownloadsFiles();
-
         setTimeout(() => {
-            let matchedFile = files.find(f => {
+            // Ищем файл, имя которого (без учета расширения) совпадает с введенным
+            let matchedFile = downloadableFiles.find(f => {
                 let nameOnly = f.replace(/\.[^/.]+$/, "").toLowerCase();
                 return nameOnly === inputName.toLowerCase();
             });
 
             if (!matchedFile) {
+                // Если в списке нет, пробуем подставить .zip по умолчанию
                 matchedFile = inputName.includes('.') ? inputName : inputName + '.zip';
             }
 
@@ -302,7 +277,7 @@ async function executeCommand() {
             link.click();
             document.body.removeChild(link);
 
-            terminalLog.innerHTML += `<div class="text-cyber-neon">[✓] Успешно: файл "${escapeHtml(matchedFile)}" передан на скачивание!</div>`;
+            terminalLog.innerHTML += `<div class="text-cyber-neon">[✓] Успешно: проект "${escapeHtml(matchedFile.replace(/\.[^/.]+$/, ""))}" передан на скачивание!</div>`;
             terminalLog.scrollTop = terminalLog.scrollHeight;
         }, 500);
 
