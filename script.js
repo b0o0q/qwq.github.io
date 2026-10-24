@@ -1,3 +1,32 @@
+// Автоматическое сканирование папки downloads через сервер
+async function getDownloadsFiles() {
+    try {
+        const response = await fetch('downloads/');
+        if (!response.ok) throw new Error('Не удалось прочитать папку downloads');
+        const html = await response.text();
+        
+        // Парсим HTML-ответ сервера
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const links = doc.querySelectorAll('a');
+        
+        let files = [];
+        links.forEach(link => {
+            let href = link.getAttribute('href');
+            // Пропускаем системные ссылки и папки
+            if (href && href !== '../' && href !== './' && !href.endsWith('/')) {
+                try { href = decodeURIComponent(href); } catch(e) {}
+                let fileName = href.split('/').pop();
+                if (fileName) files.push(fileName);
+            }
+        });
+        return files;
+    } catch (e) {
+        console.error(e);
+        return [];
+    }
+}
+
 // Массив репозиториев (подгружается динамически с GitHub)
 let projectsData = [];
 
@@ -206,33 +235,6 @@ function focusTerminal() {
     if (cliInput) setTimeout(() => cliInput.focus(), 100);
 }
 
-// Вспомогательная функция для автоматического сканирования папки downloads через сервер
-async function getDownloadsFiles() {
-    try {
-        const response = await fetch('downloads/');
-        if (!response.ok) throw new Error('Не удалось прочитать папку downloads');
-        const html = await response.text();
-        
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const links = doc.querySelectorAll('a');
-        
-        let files = [];
-        links.forEach(link => {
-            let href = link.getAttribute('href');
-            if (href && href !== '../' && href !== './' && !href.endsWith('/')) {
-                try { href = decodeURIComponent(href); } catch(e) {}
-                let fileName = href.split('/').pop();
-                if (fileName) files.push(fileName);
-            }
-        });
-        return files;
-    } catch (e) {
-        console.error(e);
-        return [];
-    }
-}
-
 async function executeCommand() {
     const fullCmd = cliInput.value.trim();
     const cmdLower = fullCmd.toLowerCase();
@@ -244,7 +246,8 @@ async function executeCommand() {
 
     if (cmdLower === 'help') {
         terminalLog.innerHTML += `<div class="text-cyber-neon">Доступно: projects, matrix, sudo install &lt;пакет&gt;, clear</div>`;
-    } else if (cmdLower === 'projects') {
+    } 
+    else if (cmdLower === 'projects') {
         terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Сканирование директории /downloads...</div>`;
         terminalLog.scrollTop = terminalLog.scrollHeight;
 
@@ -255,14 +258,17 @@ async function executeCommand() {
         } else {
             terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Доступные пакеты:</div>`;
             files.forEach(file => {
+                // Выводим имя файла без расширения
                 const nameWithoutExt = file.replace(/\.[^/.]+$/, "");
                 terminalLog.innerHTML += `<div class="text-cyber-neon pl-4">- ${escapeHtml(nameWithoutExt)}</div>`;
             });
         }
-    } else if (cmdLower === 'matrix') {
+    } 
+    else if (cmdLower === 'matrix') {
         isMatrixMode = !isMatrixMode;
         terminalLog.innerHTML += `<div class="text-cyber-neon">Matrix Mode: ${isMatrixMode}</div>`;
-    } else if (cmdLower.startsWith('sudo install')) {
+    } 
+    else if (cmdLower.startsWith('sudo install')) {
         let inputName = fullCmd.replace(/^sudo\s+install\s*/i, '').trim();
         if (!inputName) {
             terminalLog.innerHTML += `<div class="text-yellow-400">Ошибка: не указано имя пакета. Пример: sudo install test</div>`;
@@ -299,9 +305,11 @@ async function executeCommand() {
             terminalLog.scrollTop = terminalLog.scrollHeight;
         }, 500);
 
-    } else if (cmdLower === 'clear') {
+    } 
+    else if (cmdLower === 'clear') {
         terminalLog.innerHTML = '';
-    } else {
+    } 
+    else {
         terminalLog.innerHTML += `<div class="text-yellow-400">Команда не найдена. Введите 'help' для справки.</div>`;
     }
     terminalLog.scrollTop = terminalLog.scrollHeight;
