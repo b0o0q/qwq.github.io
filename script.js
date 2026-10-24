@@ -1,10 +1,15 @@
-// Список файлов в локальной папке downloads (добавляйте сюда файлы по мере необходимости)
-const downloadableFiles = [
-    'project-one.zip',
-    'cyber-dashboard.rar',
-    'ai-helper.tar.gz',
-    'portfolio-v1.zip'
-];
+// Функция получения списка файлов из локального реестра downloads/files.json
+async function getDownloadsFiles() {
+    try {
+        const response = await fetch('downloads/files.json');
+        if (!response.ok) throw new Error('Не найден файл files.json в папке downloads');
+        const files = await response.json();
+        return Array.isArray(files) ? files : [];
+    } catch (e) {
+        console.error('Ошибка чтения списка проектов:', e);
+        return [];
+    }
+}
 
 // Массив репозиториев (подгружается динамически с GitHub)
 let projectsData = [];
@@ -214,7 +219,7 @@ function focusTerminal() {
     if (cliInput) setTimeout(() => cliInput.focus(), 100);
 }
 
-function executeCommand() {
+async function executeCommand() {
     const fullCmd = cliInput.value ? cliInput.value.trim() : '';
     const cmdLower = fullCmd.toLowerCase();
     
@@ -228,13 +233,17 @@ function executeCommand() {
         terminalLog.innerHTML += `<div class="text-cyber-neon">Доступно: projects, matrix, sudo install &lt;пакет&gt;, clear</div>`;
     } 
     else if (cmdLower === 'projects') {
-        terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Доступные проекты в локальной библиотеке (/downloads):</div>`;
+        terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Чтение библиотеки проектов (/downloads)...</div>`;
+        terminalLog.scrollTop = terminalLog.scrollHeight;
+
+        const files = await getDownloadsFiles();
         
-        if (downloadableFiles.length === 0) {
-            terminalLog.innerHTML += `<div class="text-cyber-muted">Папка пуста.</div>`;
+        if (files.length === 0) {
+            terminalLog.innerHTML += `<div class="text-cyber-muted">Библиотека пуста или не удалось прочитать files.json.</div>`;
         } else {
-            downloadableFiles.forEach(file => {
-                // Убираем расширение (всё, начиная с точки) для вывода в терминал
+            terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Доступные проекты:</div>`;
+            files.forEach(file => {
+                // Выводим имя файла без расширения
                 const nameWithoutExt = file.replace(/\.[^/.]+$/, "");
                 terminalLog.innerHTML += `<div class="text-cyber-neon pl-4">- ${escapeHtml(nameWithoutExt)}</div>`;
             });
@@ -247,24 +256,25 @@ function executeCommand() {
     else if (cmdLower.startsWith('sudo install')) {
         let inputName = fullCmd.replace(/^sudo\s+install\s*/i, '').trim();
         if (!inputName) {
-            terminalLog.innerHTML += `<div class="text-yellow-400">Ошибка: не указано имя пакета. Пример: sudo install project-one</div>`;
+            terminalLog.innerHTML += `<div class="text-yellow-400">Ошибка: не указано имя пакета. Пример: sudo install wulf</div>`;
             terminalLog.scrollTop = terminalLog.scrollHeight;
             return;
         }
 
         terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Запрос прав суперпользователя (sudo)...</div>`;
-        terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Поиск проекта "${escapeHtml(inputName)}" в библиотеке...</div>`;
+        terminalLog.innerHTML += `<div class="text-cyber-cyan">+ Поиск проекта "${escapeHtml(inputName)}" в библиотеке...</div>`;
         terminalLog.scrollTop = terminalLog.scrollHeight;
 
+        const files = await getDownloadsFiles();
+
         setTimeout(() => {
-            // Ищем файл, имя которого (без учета расширения) совпадает с введенным
-            let matchedFile = downloadableFiles.find(f => {
+            // Ищем файл по имени без учета расширения
+            let matchedFile = files.find(f => {
                 let nameOnly = f.replace(/\.[^/.]+$/, "").toLowerCase();
                 return nameOnly === inputName.toLowerCase();
             });
 
             if (!matchedFile) {
-                // Если в списке нет, пробуем подставить .zip по умолчанию
                 matchedFile = inputName.includes('.') ? inputName : inputName + '.zip';
             }
 
