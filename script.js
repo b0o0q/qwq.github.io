@@ -1,4 +1,3 @@
-// Функция получения списка файлов из локального реестра downloads/files.json
 async function getDownloadsFiles() {
     try {
         const response = await fetch('downloads/files.json');
@@ -11,7 +10,6 @@ async function getDownloadsFiles() {
     }
 }
 
-// Массив репозиториев (подгружается динамически с GitHub)
 let projectsData = [];
 
 let audioEnabled = false;
@@ -48,6 +46,12 @@ function playCyberSound(type) {
         osc.start(now);
         osc.stop(now + 0.05);
     } catch (e) { console.error(e); }
+}
+
+function triggerHologramMessage() {
+    playCyberSound('click');
+    const telegramUsername = 'b0o0ql';
+    window.open(`https://t.me/${telegramUsername}`, '_blank');
 }
 
 const canvas = document.getElementById('bgCanvas');
@@ -105,7 +109,6 @@ function switchView(viewName) {
     }
 }
 
-// Получение реальных данных с GitHub API
 async function fetchGitHubData() {
     const username = 'b0o0q';
     try {
@@ -195,7 +198,6 @@ function filterProjects() {
     renderAllProjects(filtered);
 }
 
-// Генерация графика активности с реального GitHub аккаунта
 function generateHeatmap() {
     const grid = document.getElementById('heatmapGrid');
     if (!grid) return;
@@ -243,7 +245,6 @@ async function executeCommand() {
         } else {
             terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Доступные проекты:</div>`;
             files.forEach(file => {
-                // Выводим имя файла без расширения
                 const nameWithoutExt = file.replace(/\.[^/.]+$/, "");
                 terminalLog.innerHTML += `<div class="text-cyber-neon pl-4">- ${escapeHtml(nameWithoutExt)}</div>`;
             });
@@ -268,7 +269,6 @@ async function executeCommand() {
         const files = await getDownloadsFiles();
 
         setTimeout(() => {
-            // Ищем файл по имени без учета расширения
             let matchedFile = files.find(f => {
                 let nameOnly = f.replace(/\.[^/.]+$/, "").toLowerCase();
                 return nameOnly === inputName.toLowerCase();
@@ -302,7 +302,6 @@ async function executeCommand() {
     terminalLog.scrollTop = terminalLog.scrollHeight;
 }
 
-// Вспомогательная функция для безопасного вывода текста в терминал
 function escapeHtml(text) {
     return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
