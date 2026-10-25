@@ -69,6 +69,7 @@
                 </a>
             </div>
 
+            <!-- Десктопная навигация -->
             <nav class="hidden md:flex items-center space-x-6 text-xs font-mono">
                 <button onclick="switchView('profile')" id="nav-profile" class="nav-link text-cyber-neon flex items-center gap-1.5 hover:text-cyber-neon transition-colors">
                     <i class="fa-solid fa-user-ninja"></i> [ПРОФИЛЬ]
@@ -82,6 +83,12 @@
             </nav>
 
             <div class="flex items-center space-x-3">
+                <!-- Мобильная кнопка с иконкой терминала -->
+                <button onclick="toggleMobileMenu()" id="mobileMenuBtn" title="Открыть меню" 
+                        class="md:hidden p-2 w-9 h-9 flex items-center justify-center rounded bg-cyber-panel border border-cyber-border text-cyber-neon hover:border-cyber-neon transition-all">
+                    <i class="fa-solid fa-terminal text-xs"></i>
+                </button>
+
                 <button onclick="toggleAudio()" id="audioBtn" title="Включить/Выключить звуковые эффекты" 
                         class="p-2 w-9 h-9 flex items-center justify-center rounded bg-cyber-panel border border-cyber-border text-cyber-muted hover:text-cyber-neon hover:border-cyber-neon transition-all">
                     <i id="audioIcon" class="fa-solid fa-volume-xmark text-xs"></i>
@@ -109,6 +116,19 @@
                     <span class="hidden sm:inline">GitHub</span>
                 </a>
             </div>
+        </div>
+
+        <!-- Мобильное выпадающее меню -->
+        <div id="mobileMenu" class="hidden md:hidden bg-cyber-bg/95 border-b border-cyber-border px-4 py-3 space-y-2 text-xs font-mono transition-all">
+            <button onclick="switchView('profile'); closeMobileMenu();" id="nav-profile-mobile" class="mobile-nav-item w-full text-left py-2 px-3 rounded bg-cyber-panel/50 text-cyber-neon flex items-center gap-2 border border-transparent hover:border-cyber-neon transition-colors">
+                <i class="fa-solid fa-user-ninja"></i> [ПРОФИЛЬ]
+            </button>
+            <button onclick="switchView('projects'); closeMobileMenu();" id="nav-projects-mobile" class="mobile-nav-item w-full text-left py-2 px-3 rounded bg-cyber-panel/50 text-cyber-muted flex items-center gap-2 border border-transparent hover:border-cyber-neon transition-colors">
+                <i class="fa-solid fa-cubes"></i> [ПРОЕКТЫ]
+            </button>
+            <button onclick="switchView('terminal'); closeMobileMenu();" id="nav-terminal-mobile" class="mobile-nav-item w-full text-left py-2 px-3 rounded bg-cyber-panel/50 text-cyber-muted flex items-center gap-2 border border-transparent hover:border-cyber-neon transition-colors">
+                <i class="fa-solid fa-terminal"></i> [CLI ТЕРМИНАЛ]
+            </button>
         </div>
     </header>
 
