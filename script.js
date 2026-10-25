@@ -92,20 +92,51 @@ function drawCanvasBackground() {
     requestAnimationFrame(drawCanvasBackground);
 }
 
+function toggleMobileMenu() {
+    playCyberSound('click');
+    const menu = document.getElementById('mobileMenu');
+    if (menu) {
+        menu.classList.toggle('hidden');
+    }
+}
+
+function closeMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    if (menu) {
+        menu.classList.add('hidden');
+    }
+}
+
 function switchView(viewName) {
     playCyberSound('click');
     document.querySelectorAll('.view-panel').forEach(panel => panel.classList.add('hidden'));
+    
+    // Сброс подсветки десктопного меню
     document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('text-cyber-neon');
+        link.classList.add('text-cyber-muted');
+    });
+
+    // Сброс подсветки мобильного меню
+    document.querySelectorAll('.mobile-nav-item').forEach(link => {
         link.classList.remove('text-cyber-neon');
         link.classList.add('text-cyber-muted');
     });
 
     const activeView = document.getElementById(`view-${viewName}`);
     const activeNav = document.getElementById(`nav-${viewName}`);
+    const activeNavMobile = document.getElementById(`nav-${viewName}-mobile`);
+
     if (activeView) activeView.classList.remove('hidden');
+    
     if (activeNav) {
         activeNav.classList.remove('text-cyber-muted');
         activeNav.classList.add('text-cyber-neon');
+    }
+
+    if (activeNavMobile) {
+        activeNavMobile.classList.remove('text-cyber-muted');
+        activeNavMobile.classList.add('text-cyber-neon');
     }
 }
 
