@@ -111,11 +111,13 @@ function switchView(viewName) {
     playCyberSound('click');
     document.querySelectorAll('.view-panel').forEach(panel => panel.classList.add('hidden'));
     
+    // Сброс подсветки десктопного меню
     document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('text-cyber-neon');
         link.classList.add('text-cyber-muted');
     });
 
+    // Сброс подсветки мобильного меню
     document.querySelectorAll('.mobile-nav-item').forEach(link => {
         link.classList.remove('text-cyber-neon');
         link.classList.add('text-cyber-muted');
@@ -237,22 +239,6 @@ function generateHeatmap() {
     `;
 }
 
-// Функция для обновления живых часов под пользователя
-function updateLiveClock() {
-    const clockElement = document.getElementById('liveClock');
-    if (!clockElement) return;
-
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    clockElement.textContent = `${hours}:${minutes}:${seconds}`;
-}
-
-// Запускаем обновление каждую секунду
-setInterval(updateLiveClock, 1000);
-
 const cliInput = document.getElementById('cliInput');
 const terminalLog = document.getElementById('terminalLog');
 
@@ -277,7 +263,7 @@ async function executeCommand() {
     cliInput.value = '';
 
     if (cmdLower === 'help') {
-        terminalLog.innerHTML += `<div class="text-cyber-neon">Доступно: projects, matrix, sudo install &lt;пакет&gt;, clear</div>`;
+        terminalLog.innerHTML += `<div class="text-cyber-neon">Доступно: projects, matrix, info &lt;имя_файла&gt;, sudo install &lt;пакет&gt;, clear</div>`;
     } 
     else if (cmdLower === 'projects') {
         terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Чтение библиотеки проектов (/downloads)...</div>`;
@@ -299,6 +285,33 @@ async function executeCommand() {
         isMatrixMode = !isMatrixMode;
         terminalLog.innerHTML += `<div class="text-cyber-neon">Matrix Mode: ${isMatrixMode}</div>`;
     } 
+    else if (cmdLower.startsWith('info')) {
+        let fileName = fullCmd.replace(/^info\s*/i, '').trim();
+        if (!fileName) {
+            terminalLog.innerHTML += `<div class="text-yellow-400">Ошибка: не указано имя файла. Пример: info notes</div>`;
+            terminalLog.scrollTop = terminalLog.scrollHeight;
+            return;
+        }
+
+        // Автоматически добавляем расширение .txt, если пользователь его не написал
+        if (!fileName.toLowerCase().endsWith('.txt')) {
+            fileName += '.txt';
+        }
+
+        terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Поиск файла "${escapeHtml(fileName)}" в системе...</div>`;
+        terminalLog.scrollTop = terminalLog.scrollHeight;
+
+        try {
+            const response = await fetch(fileName);
+            if (!response.ok) throw new Error('Файл не найден');
+            
+            const textContent = await response.text();
+            terminalLog.innerHTML += `<div class="text-cyber-neon">[✓] Содержимое файла ${escapeHtml(fileName)}:</div>`;
+            terminalLog.innerHTML += `<div class="text-white bg-black/50 p-2 rounded border border-cyber-border mt-1 whitespace-pre-wrap">${escapeHtml(textContent)}</div>`;
+        } catch (e) {
+            terminalLog.innerHTML += `<div class="text-yellow-400">[-] Ошибка: текстовый файл "${escapeHtml(fileName)}" не найден на сервере.</div>`;
+        }
+    }
     else if (cmdLower.startsWith('sudo install')) {
         let inputName = fullCmd.replace(/^sudo\s+install\s*/i, '').trim();
         if (!inputName) {
@@ -362,6 +375,5 @@ window.onload = function() {
     drawCanvasBackground();
     fetchGitHubData();
     generateHeatmap();
-    updateLiveClock(); // Инициализация часов при загрузке
     window.addEventListener('resize', resizeCanvas);
 };
