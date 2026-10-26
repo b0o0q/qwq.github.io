@@ -239,6 +239,19 @@ function generateHeatmap() {
     `;
 }
 
+// Функция динамических часов пользователя
+function updateLiveClock() {
+    const clockElement = document.getElementById('liveClock');
+    if (!clockElement) return;
+
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    clockElement.textContent = `${hours}:${minutes}:${seconds}`;
+}
+
 const cliInput = document.getElementById('cliInput');
 const terminalLog = document.getElementById('terminalLog');
 
@@ -293,7 +306,6 @@ async function executeCommand() {
             return;
         }
 
-        // Автоматически добавляем расширение .txt, если пользователь его не написал
         if (!fileName.toLowerCase().endsWith('.txt')) {
             fileName += '.txt';
         }
@@ -377,5 +389,10 @@ window.onload = function() {
     drawCanvasBackground();
     fetchGitHubData();
     generateHeatmap();
+    
+    // Запускаем динамические часы при загрузке и обновляем каждую секунду[cite: 2]
+    updateLiveClock();
+    setInterval(updateLiveClock, 1000);
+
     window.addEventListener('resize', resizeCanvas);
 };
