@@ -111,13 +111,11 @@ function switchView(viewName) {
     playCyberSound('click');
     document.querySelectorAll('.view-panel').forEach(panel => panel.classList.add('hidden'));
     
-    // Сброс подсветки десктопного меню
     document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('text-cyber-neon');
         link.classList.add('text-cyber-muted');
     });
 
-    // Сброс подсветки мобильного меню
     document.querySelectorAll('.mobile-nav-item').forEach(link => {
         link.classList.remove('text-cyber-neon');
         link.classList.add('text-cyber-muted');
@@ -239,6 +237,22 @@ function generateHeatmap() {
     `;
 }
 
+// Функция для обновления живых часов под пользователя
+function updateLiveClock() {
+    const clockElement = document.getElementById('liveClock');
+    if (!clockElement) return;
+
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    clockElement.textContent = `${hours}:${minutes}:${seconds}`;
+}
+
+// Запускаем обновление каждую секунду
+setInterval(updateLiveClock, 1000);
+
 const cliInput = document.getElementById('cliInput');
 const terminalLog = document.getElementById('terminalLog');
 
@@ -348,5 +362,6 @@ window.onload = function() {
     drawCanvasBackground();
     fetchGitHubData();
     generateHeatmap();
+    updateLiveClock(); // Инициализация часов при загрузке
     window.addEventListener('resize', resizeCanvas);
 };
