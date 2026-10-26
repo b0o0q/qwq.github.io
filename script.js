@@ -288,7 +288,7 @@ async function executeCommand() {
     else if (cmdLower.startsWith('info')) {
         let fileName = fullCmd.replace(/^info\s*/i, '').trim();
         if (!fileName) {
-            terminalLog.innerHTML += `<div class="text-yellow-400">Ошибка: не указано имя файла. Пример: info notes</div>`;
+            terminalLog.innerHTML += `<div class="text-yellow-400">Ошибка: не указано имя файла. Пример: info wulf</div>`;
             terminalLog.scrollTop = terminalLog.scrollHeight;
             return;
         }
@@ -298,18 +298,20 @@ async function executeCommand() {
             fileName += '.txt';
         }
 
-        terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Поиск файла "${escapeHtml(fileName)}" в системе...</div>`;
+        const fileUrl = `downloads/${fileName}`;
+
+        terminalLog.innerHTML += `<div class="text-cyber-cyan">[+] Поиск файла "${escapeHtml(fileName)}" в директории downloads/...</div>`;
         terminalLog.scrollTop = terminalLog.scrollHeight;
 
         try {
-            const response = await fetch(fileName);
+            const response = await fetch(fileUrl);
             if (!response.ok) throw new Error('Файл не найден');
             
             const textContent = await response.text();
             terminalLog.innerHTML += `<div class="text-cyber-neon">[✓] Содержимое файла ${escapeHtml(fileName)}:</div>`;
             terminalLog.innerHTML += `<div class="text-white bg-black/50 p-2 rounded border border-cyber-border mt-1 whitespace-pre-wrap">${escapeHtml(textContent)}</div>`;
         } catch (e) {
-            terminalLog.innerHTML += `<div class="text-yellow-400">[-] Ошибка: текстовый файл "${escapeHtml(fileName)}" не найден на сервере.</div>`;
+            terminalLog.innerHTML += `<div class="text-yellow-400">[-] Ошибка: текстовый файл "${escapeHtml(fileName)}" не найден в папке downloads.</div>`;
         }
     }
     else if (cmdLower.startsWith('sudo install')) {
